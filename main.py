@@ -8,7 +8,7 @@ import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 app = FastAPI(title="Telegram Notifications")
 
@@ -70,8 +70,10 @@ async def notify(notification: Notification):
         for key, value in notification.details.items():
             message += f"  • {key}: {value}\n"
     
-    # Timestamp
-    message += f"\n🕐 {datetime.now().strftime('%d/%m %H:%M')}"
+    # Timestamp (Argentina UTC-3)
+    argentina_tz = timezone(timedelta(hours=-3))
+    now = datetime.now(argentina_tz)
+    message += f"\n🕐 {now.strftime('%d/%m %H:%M')}"
     
     await send_telegram(message)
     return {"status": "ok"}
